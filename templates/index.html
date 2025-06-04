@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Health Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🩺 AI Health Chatbot</h1>
+        <form method="POST">
+           <input type="text" name="symptoms" list="symptomsList" placeholder="e.g., fever, headache" required>
+
+<datalist id="symptomsList">
+  <option value="fever">
+  <option value="cough">
+  <option value="headache">
+  <option value="fatigue">
+  <option value="nausea">
+  <option value="vomiting">
+  <option value="sore throat">
+  <option value="chills">
+  <!-- Add more -->
+</datalist>
+            <button type="button" onclick="startDictation()">🎤</button>
+
+            <button type="submit">🔍 Diagnose</button>
+        </form>
+
+        {% if prediction %}
+        <div class="result-box">
+            <h2>🧠 Possible Condition: <span>{{ prediction }}</span></h2>
+            <p>👨‍⚕️ Suggested Doctor: <strong>{{ doctor }}</strong></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ✅ Place this before closing body tag -->
+    <script>
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const input = document.querySelector('input[name="symptoms"]').value.trim();
+    if (input === "") {
+      e.preventDefault();
+      const toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+  });
+
+  function startDictation() {
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+    
+    recognition.start();
+    
+    recognition.onresult = function(e) {
+      document.querySelector('input[name="symptoms"]').value = e.results[0][0].transcript;
+      recognition.stop();
+    };
+    
+    recognition.onerror = function(e) {
+      recognition.stop();
+      alert("🎙️ Speech recognition failed. Try again.");
+    };
+  } else {
+    alert("Speech recognition not supported in your browser.");
+  }
+}
+
+</script>
+
+    <div id="toast" class="toast">❗ Please enter at least one symptom.</div>
+
+</body>
+</html>
